@@ -1,0 +1,431 @@
+﻿
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+        <h4>Application From</h4>
+        <div class="card">
+            <div class="card-body">
+                <form id="Employee_Form" name="Employee_Form" enctype="multipart/form-data" method="post" action="/Home/Save_Employee_Detail">
+                    <div class="row">
+                        <input type="hidden" id="Emp_id" name="Emp_id" value="0"/>
+                        <div class="col-lg-4">
+                            <div class="mb-3">
+                                <label for="exampleInputEmail1" class="form-label">Enter Name*</label>
+                                <input type="text" class="form-control" id="Emp_Name" name="Emp_Name" />
+
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="mb-3">
+                                <label for="exampleInputEmail1" class="form-label">Age*</label>
+                                <input type="text" class="form-control" id="Age" name="Age" />
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-4">
+                            <div class="mb-3">
+                                <label for="exampleInputEmail1" class="form-label">Gender*</label>
+                                <br />
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" id="maleRadio" class="form-check-input" name="gender" value="Male">
+                                    Male
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" id="femaleRadio" class="form-check-input" name="gender" value="Female">
+                                    Female
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="mb-3">
+                                <label for="exampleInputEmail1" class="form-label">Email* </label>
+                                <input type="email" class="form-control" id="Email" name="Email" />
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="mb-3">
+                                <label for="exampleInputEmail1" class="form-label">Phone Number*</label>
+                                <input type="email" class="form-control" id="Mobile" name="Mobile" maxlength="10" />
+
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="mb-3">
+                                <label for="exampleInputEmail1" class="form-label">Country*</label>
+
+                                <select id="ddl_Country" name="ddl_Country" class="form-control" onchange="onchange_Country(this)">
+                                </select>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="mb-3">
+                                <label for="exampleInputEmail1" class="form-label">State*</label>
+                                <select id="ddl_State" name="ddl_State" class="form-control">
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="mb-3 pt-4">
+                                <button class="btn btn-primary"id="bnt_Save" type="button" onclick="Save_Employee_Detail()">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+        <div class="card mt-3">
+
+            <div class="card-body">
+        
+                <table class="table   table-striped" id="employeeTable">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Age</th>
+                            <th scope="col">Gender</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Phone_Number</th>
+                            <th scope="col">Country_Name</th>
+                            <th scope="col">State_Name</th>
+                            <th scope="col">Active</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                       
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/validJS.js"></script>
+    <script>
+
+        $(document).ready(function () {
+            fetchEmployeeDetails();
+            Get_Country();
+        });
+
+
+        // Get country Name List
+        function Get_Country() {
+        $.ajax({
+            url: '@Url.Action("Get_Country", "Home")',
+            type: 'GET',
+            success: function (data) {
+                if (data.error) {
+                    // Handle the error if an error response is received.
+                    console.error(data.error);
+                } else {
+                    // Process the data received from the action.
+                    var select = $('#ddl_Country');
+                    select.empty();
+                    select.append($('<option>', {
+                        value: '0',
+                        text: 'Select'
+                    }));
+                    $.each(data, function (index, item) {
+                        select.append($('<option>', {
+                            value: item.Country_id,
+                            text: item.Name
+                        }));
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+                // Handle the AJAX request error here.
+                console.error("AJAX error: " + status + " - " + error);
+            }
+        });
+    }
+
+
+
+        // this function get State Name List according to Country
+        function onchange_Country(selectElement) {
+            const selectedIndex = selectElement.selectedIndex;
+            const selectedOption = selectElement.options[selectedIndex];
+            const selectedValue = selectedOption.value;
+            if (selectedValue != "0") {
+                get_state(selectedValue,0);
+            } else {
+                $('#ddl_State').empty();
+            }
+     }
+
+        function get_state(selectedValue, State_id) {
+            $.ajax({
+                    url: "@Url.Action("Get_State", "Home")",
+                    type: 'GET',
+                    data: { "Country_id": selectedValue },
+                    success: function (data) {
+                        if (data.error) {
+
+                            console.error(data.error);
+                        } else {
+                            // Process the data received from the action.
+                            var select = $('#ddl_State');
+                            select.empty();
+                            $.each(data, function (index, item) {
+                                select.append($('<option>', {
+                                    value: item.State_id,
+                                    text: item.Name
+                                }));
+                            });
+                            if (State_id != 0) {
+                                select.val(State_id);
+                            }
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle the AJAX request error here.
+                        console.error("AJAX error: " + status + " - " + error);
+                    }
+            });
+            return false;
+        }
+
+        function Save_Employee_Detail() {
+    var Emp_Name = $("#Emp_Name").val();
+    var Age = $("#Age").val();
+    var Gender = $("input[name='gender']:checked").val();
+    var Email = $("#Email").val();
+    var Mobile = $("#Mobile").val();
+    var ddl_Country = $("#ddl_Country").val();
+
+    if (Emp_Name === "") {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Warning',
+            text: 'Please enter Employee Name'
+        });
+    } else if (!/^[A-Za-z]+$/.test(Emp_Name)) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Warning',
+            text: 'Employee Name should contain only alphabetic characters'
+        });
+    } else if (Age === "" || isNaN(Age) || parseInt(Age) !== parseFloat(Age) || parseInt(Age) < 18 || parseInt(Age) > 100) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Warning',
+            text: 'Please enter a valid integer Age (between 18 and 100)'
+        });
+    } else if (Gender === undefined) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Warning',
+            text: 'Please select Gender'
+        });
+    } else if (Email === "" || !isValidEmail(Email)) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Warning',
+            text: 'Please enter a valid Email'
+        });
+    } else if (Mobile === "" || !isValidPhoneNumber(Mobile)) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Warning',
+            text: 'Please enter a valid Mobile Number'
+        });
+    } else if (ddl_Country === "0") {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Warning',
+            text: 'Please select a Country'
+        });
+    } else {
+        // All data is valid, proceed with saving data
+        var form = $('#Employee_Form')[0];
+        var data = new FormData(form);
+        $.ajax({
+            type: 'POST',
+            enctype: 'multipart/form-data',
+            url: 'Home/Save_Employee_Detail',
+            data: data,
+            contentType: false,
+            processData: false,
+            cache: false,
+            crossDomain: true,
+            success: function (response) {
+                if (response == '1') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'employee details saved successfully'
+                    });
+                    fetchEmployeeDetails();
+                    Free();
+                }
+                else if (response == '2') {
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'employee details Update successfully'
+                    });
+                    $("#Emp_id").val("0");
+                    fetchEmployeeDetails();
+                    Free();
+                    $("#bnt_Save").text("Save");
+                }
+                else {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Info',
+                        text: 'Details not saved successfully'
+                    });
+                }
+            },
+            error: function (response) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while saving the details'
+                });
+            }
+        });
+    }
+        }
+
+
+        // Function to fetch and update employee data using AJAX
+        function fetchEmployeeDetails() {
+            $.ajax({
+                type: "POST",
+                url: "/Home/GetEmployeeDetails",
+                dataType: "json",
+                success: function (data) {
+                    if (data.error) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Info',
+                            text: data.error
+                        });
+                    } else {
+                        var tableBody = $("#employeeTable tbody");
+                        tableBody.empty(); // Clear existing rows
+
+                        $.each(data, function (index, employee) {
+                            var row = "<tr>" +
+                                "<td style='display:none'>" + employee.Emp_id + "</td>" +
+                                "<td style='display:none'>" + employee.Country_id + "</td>" +
+                                "<td style='display:none'>" + employee.State_id + "</td>" +
+
+                                "<td>" + employee.Name + "</td>" +
+                                "<td>" + employee.Age + "</td>" +
+                                "<td>" + employee.Gender + "</td>" +
+                                "<td>" + employee.Email + "</td>" +
+                                "<td>" + employee.Phone_Number + "</td>" +
+                                "<td>" + employee.country_Name + "</td>" +
+                                "<td>" + employee.State_Name + "</td>" +
+                                "<td>" +
+                                "<button class='btn btn-primary' type='button' onclick='editRow(this)'>Edit</button>" +
+                                "<button onclick='Delete(" + employee.Emp_id + ")' class='btn btn-danger'>Delete</button>" +
+                                "</td>" +
+                                "</tr>";
+
+                            tableBody.append(row);
+                        });
+                    }
+                    //
+                },
+                error: function () {
+                    alert("An error occurred while making the request.");
+                 
+                }
+            });
+        }
+
+
+        function editRow(button) {
+
+            var row = button.closest('tr');
+            var cells = row.cells;
+
+            var Emp_id = cells[0].textContent;
+            var Country_id = cells[1].textContent;
+            var State_id = cells[2].textContent;
+            var Emp_Name = cells[3].textContent;
+            var Age = cells[4].textContent;
+            var gender = cells[5].textContent;
+            var Email = cells[6].textContent;
+            var Mobile = cells[7].textContent;
+            var Country_Name = cells[8].textContent;
+            var State_Name = cells[8].textContent;
+
+            $("#Emp_id").val(Emp_id);
+            $("#Emp_Name").val(Emp_Name);
+            $("#Age").val(Age);
+            if (gender === "Male") {
+            document.getElementById('maleRadio').checked = true;
+            } else if (gender === 'Female') {
+                document.getElementById('femaleRadio').checked = true;
+            }
+
+            $("#Email").val(Email);
+            $("#Mobile").val(Mobile);
+            $("#ddl_Country").val(Country_id);
+            get_state(Country_id, State_id);
+            $("#bnt_Save").text("Update");
+
+        }
+
+
+        function Delete(Emp_id) {
+            $.ajax({
+                type: "POST",
+                url: "/Home/Delete_Employee",
+                data: { "Emp_id": Emp_id },
+                dataType: "json",
+                success: function (response) {
+                    
+                    if (response.mess == "1") {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'success',
+                            text: 'Delete Successfully'
+                        });
+                        fetchEmployeeDetails();
+                    } else {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Info',
+                            text: response.error
+                        });
+                    }
+                },
+                error: function () {
+                    alert("An error occurred while making the request.");
+                }
+            });
+        }
+
+
+        function Free() {
+            $("#Emp_Name").val("");
+            $("#Age").val("");
+            $("#Email").val("");
+            $("#Mobile").val("");
+            $("#ddl_State").empty();
+            Get_Country();
+           }
+    </script>
+</body>
+</html>
